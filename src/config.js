@@ -5,3 +5,5 @@ export const APP_TITLE = "Ravens Scans";
 export const APP_URL = "https://ravens-scans.com";
 export const DISQUS_SHORTNAME = "ravensfansub";
 export const GA_ID = "UA-112471783-1";
+export const DISCORD_URL = "https://discord.gg/2mARvkx";
+export const PATREON_URL = "https://www.patreon.com/RavensScans";
