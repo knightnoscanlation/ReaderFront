@@ -19,7 +19,7 @@ it("should displays SerieItemEmpty", () => {
       <SerieList loading={true} series={[]} filterText={filterText} />
     </MemoryRouter>
   );
-  expect(wrapper.contains(SerieItemEmpty)).toBeTruthy();
+  expect(wrapper.find(SerieItemEmpty)).toBeTruthy();
 });
 
 it("should displays SerieItem", () => {
@@ -31,7 +31,7 @@ it("should displays SerieItem", () => {
       <SerieList loading={false} series={series} filterText={filterText} />
     </MemoryRouter>
   );
-  expect(wrapper.contains(SerieItem)).toBeTruthy();
+  expect(wrapper.find(SerieItem)).toBeTruthy();
 });
 
 it("should filter series", () => {
@@ -44,7 +44,7 @@ it("should filter series", () => {
     </MemoryRouter>
   );
   wrapper.setProps({ filterText: "aka" });
-  expect(wrapper.contains(SerieItem)).toBeTruthy();
+  expect(wrapper.find(SerieItem)).toBeTruthy();
 });
 
 function generateSeries() {
