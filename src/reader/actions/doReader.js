@@ -1,4 +1,7 @@
+import axios from 'axios';
+import params from '../../params.json';
 import * as config from '../../config';
+import { queryBuilder } from '../../utils/helpers';
 
 export function readerSelectChapter(chapter) {
   return {
@@ -32,31 +35,95 @@ export function fetchChapters(lang, stub) {
   return dispatch => {
     dispatch(readerIsLoading(true));
 
-    if (lang === undefined || lang === null) {
-      dispatch(readerHasErrored(true));
-      throw Error('Lang is undefined');
-    } else if (stub === undefined || stub === null) {
+    if (stub === undefined || stub === null) {
       dispatch(readerHasErrored(true));
       throw Error('Stub is undefined');
     }
 
-    fetch(
-      `${config.READER_PATH}v2/chapters?stub=${stub}&lang=${lang}&per_page=100`
-    )
+    return axios
+      .post(
+        config.READER_PATH,
+        queryBuilder({
+          type: 'query',
+          operation: 'chaptersByWork',
+          data: {
+            language: lang ? params.global.languages[lang].id : -1,
+            workStub: stub
+          },
+          fields: [
+            'id',
+            'work {id, stub, name, uniqid}',
+            'chapter',
+            'subchapter',
+            'volume',
+            'pages {id, filename, height, width},',
+            'language',
+            'name',
+            'stub',
+            'uniqid',
+            'description',
+            'createdAt',
+            'updatedAt'
+          ]
+        })
+      )
       .then(response => {
-        if (!response.ok) {
+        if (response.statusText !== 'OK') {
           throw Error(response.statusText);
         }
 
-        dispatch(readerIsLoading(false));
-
-        return response;
+        return response.data.data.chaptersByWork;
       })
-      .then(response => response.json())
       .then(chapters =>
         chapters.sort((a, b) => Number(a.chapter) - Number(b.chapter))
       )
       .then(chapters => dispatch(readerFetchDataSuccess(chapters)))
+      .then(() => dispatch(readerIsLoading(false)))
       .catch(err => dispatch(readerHasErrored(true)));
+  };
+}
+
+export function fetchChapter(chapterId) {
+  return dispatch => {
+    if (chapterId === undefined || chapterId === null) {
+      dispatch(readerHasErrored(true));
+      throw Error('chapterId is undefined');
+    }
+
+    return axios
+      .post(
+        config.READER_PATH,
+        queryBuilder({
+          type: 'query',
+          operation: 'chapterById',
+          data: {
+            id: parseInt(chapterId, 0)
+          },
+          fields: [
+            'id',
+            'work {id, stub, name, uniqid}',
+            'chapter',
+            'subchapter',
+            'volume',
+            'pages {id, filename, height, width, size},',
+            'language',
+            'name',
+            'stub',
+            'uniqid',
+            'description',
+            'thumbnail',
+            'createdAt',
+            'updatedAt'
+          ]
+        })
+      )
+      .then(response => {
+        if (response.statusText !== 'OK') {
+          throw Error(response.statusText);
+        }
+
+        return response.data.data.chapterById;
+      })
+      .then(chapter => dispatch(readerSelectChapter(chapter)));
   };
 }

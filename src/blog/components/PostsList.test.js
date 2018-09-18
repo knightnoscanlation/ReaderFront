@@ -1,100 +1,83 @@
-import React from "react";
-import { render, mount } from "enzyme";
-import PostsList from "./PostsList";
-import ReleaseCard from "../../releases/components/ReleaseCard";
-import PostCardEmpty from "./PostCardEmpty";
-import { BrowserRouter } from "react-router-dom";
+import React from 'react';
+import { mountWithIntl } from 'enzyme-react-intl';
+import PostsList from './PostsList';
+import PostCard from './PostCard';
+import PostCardEmpty from './PostCardEmpty';
+import { BrowserRouter } from 'react-router-dom';
 
-it("renders without crashing", () => {
-  render(<PostsList loading={true} posts={[]} />);
+const posts = global.rfMocks.posts.getPostsNormalized;
+const postsCard = generatePostCard(posts);
+
+it('renders without crashing', () => {
+  const wrapper = mountWithIntl(<PostsList loading={true} posts={[]} />);
+  wrapper.unmount();
 });
 
-it("should render posts without crashing", () => {
-  const posts = generatePosts();
-  mount(
+it('should render posts without crashing', () => {
+  const wrapper = mountWithIntl(
     <BrowserRouter>
       <PostsList loading={false} posts={posts} />
     </BrowserRouter>
   );
+
+  wrapper.unmount();
 });
 
-it("renders PostCard without crashing", () => {
-  const posts = generatePosts();
-  const listPostCard = generatePostCard(posts);
-  const wrapper = mount(
+it('renders PostCard without crashing', () => {
+  const wrapper = mountWithIntl(
     <BrowserRouter>
       <PostsList loading={false} posts={posts} />
     </BrowserRouter>
   );
-  expect(wrapper.children().containsMatchingElement(listPostCard)).toBeTruthy();
+  expect(wrapper.children().containsMatchingElement(postsCard)).toBeTruthy();
+  wrapper.unmount();
 });
 
-it("renders PostCard and fetching data without crashing", () => {
-  const posts = generatePosts();
-  const listPostCard = generatePostCard(posts);
-  const wrapper = mount(
+it('renders PostCard and fetching data without crashing', () => {
+  const wrapper = mountWithIntl(
     <BrowserRouter>
       <PostsList loading={false} posts={posts} />
     </BrowserRouter>
   );
-  expect(wrapper.children().containsMatchingElement(listPostCard)).toBeTruthy();
+  expect(wrapper.children().containsMatchingElement(postsCard)).toBeTruthy();
+  wrapper.unmount();
 });
 
-it("renders PostCard and add PostCardEmpty while is loading without crashing", () => {
-  const posts = generatePosts();
-  const listPostCard = generatePostCard(posts);
-  const wrapper = mount(
+it('renders PostCard and add PostCardEmpty while is loading without crashing', () => {
+  const wrapper = mountWithIntl(
     <BrowserRouter>
       <PostsList loading={true} posts={posts} />
     </BrowserRouter>
   );
-  expect(wrapper.children().containsMatchingElement(listPostCard)).toBeTruthy();
+  expect(wrapper.children().containsMatchingElement(postsCard)).toBeTruthy();
+  wrapper.unmount();
 });
 
-it("renders PostCardEmpty without crashing", () => {
-  const wrapper = mount(
+it('renders PostCardEmpty without crashing', () => {
+  const wrapper = mountWithIntl(
     <BrowserRouter>
       <PostsList loading={true} posts={[]} />
     </BrowserRouter>
   );
   expect(wrapper.find(PostCardEmpty)).toBeTruthy();
+  wrapper.unmount();
 });
 
 /**
- * Genera mock de publicaciones
- *
- * @returns lista de publicaciones
- */
-function generatePosts() {
-  let posts = [];
-  for (let index = 0; index < 10; index++) {
-    posts.push({
-      id: index,
-      date: "2017-01-01",
-      slug: "aa_a",
-      title: { rendered: "aaa" }
-    });
-  }
-  return posts;
-}
-
-/**
- * Genera mock de ReleaseCard
+ * Generate a PostCard mock
  *
  * @param {any} releases
- * @returns lista de ReleaseCard
+ * @returns PostCard list
  */
 function generatePostCard(posts) {
   let listPostCard = [];
   posts.map(post => {
     listPostCard.push(
-      <ReleaseCard
+      <PostCard
         key={post.id}
-        url={""}
-        name={post.title.rendered}
-        thumb={post.thumb_blog}
-        chapter={null}
-        subchapter={null}
+        onClick={on => ''}
+        post={post}
+        thumbnail={on => ''}
       />
     );
   });

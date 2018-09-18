@@ -1,59 +1,57 @@
-import React from "react";
-import { mount, shallow } from "enzyme";
-import { Provider } from "react-redux";
-import { ConnectedRouter } from "react-router-redux";
-import ReaderContainer from "./ReaderContainer";
-import App from "../../App";
-import store, { history } from "../../store";
-import { readerSelectChapter, fetchChapters } from "../actions/doReader";
-import { doChangeLanguage } from "../../layout/actions/doChangeLanguage";
+import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'enzyme-react-intl';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import ReaderContainer from './ReaderContainer';
+import store from '../../store';
+import { doChangeLanguage } from '../../layout/actions/doChangeLanguage';
+import configureMockStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import moxios from '@anilanar/moxios';
 
-it("should render without throwing an error", () => {
-  const wrapper = shallow(
+const middlewares = [thunk];
+const mockStore = configureMockStore(middlewares);
+const releases = global.rfMocks.releases.getReleases;
+const pages = global.rfMocks.releases.getPages;
+
+it('should render without throwing an error', () => {
+  const wrapper = shallowWithIntl(
     <Provider store={store}>
-      <ConnectedRouter history={history}>
-        <ReaderContainer match={"infection"} />
-      </ConnectedRouter>
+      <MemoryRouter>
+        <ReaderContainer match={'infection'} />
+      </MemoryRouter>
     </Provider>
   );
+
+  expect(wrapper).toBeTruthy();
 });
 
-it("should render without throwing an error when it receive a new language props", () => {
-  const wrapper = mount(
-    <App>
-      <Provider store={store}>
-        <ConnectedRouter history={history}>
-          <ReaderContainer />
-        </ConnectedRouter>
-      </Provider>
-    </App>
+it('should render the pages of the chapter selected', () => {
+  const store = mockStore({
+    reader: {
+      chapters: releases,
+      chapter: { ...releases[0], pages: pages },
+      readerIsLoading: false,
+      readerHasErrored: false
+    },
+    layout: {
+      language: 'es'
+    },
+    match: {
+      params: {
+        stub: 'manga'
+      }
+    }
+  });
+  const wrapper = mountWithIntl(
+    <Provider store={store}>
+      <MemoryRouter>
+        <ReaderContainer />
+      </MemoryRouter>
+    </Provider>
   );
 
-  store.dispatch(doChangeLanguage("en"));
   wrapper.update();
-});
-
-it("should render without throwing an error when it receive a new language props", () => {
-  const wrapper = mount(
-    <App>
-      <Provider store={store}>
-        <ConnectedRouter history={history}>
-          <ReaderContainer />
-        </ConnectedRouter>
-      </Provider>
-    </App>
-  );
-
-  store.dispatch(readerSelectChapter(null));
-  wrapper.update();
-});
-
-it("should throw if it receive a null stub or lang props", () => {
-  expect(() => {
-    store.dispatch(fetchChapters(null, 1));
-  }).toThrow();
-
-  expect(() => {
-    store.dispatch(fetchChapters("es", null));
-  }).toThrow();
+  expect(wrapper).toBeTruthy();
+  wrapper.unmount();
 });
