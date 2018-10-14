@@ -15,7 +15,7 @@ export function getStatusTagStyle(statusId) {
 
 // Get the work thumbnail url
 export function getWorkThumb(dir, filename, size = 'small') {
-  if (filename === null || filename === undefined) {
+  if (!filenameIsValid(filename)) {
     return '/static/images/default-cover.png';
   }
 
@@ -26,7 +26,7 @@ export function getWorkThumb(dir, filename, size = 'small') {
 }
 
 export function getChapterPageUrl(work, chapter, filename, size = 'small') {
-  if (filename === null || filename === undefined) {
+  if (!filenameIsValid(filename)) {
     return '/static/images/default-cover.png';
   }
 
@@ -40,7 +40,7 @@ export function getChapterPageUrl(work, chapter, filename, size = 'small') {
 
 // Get the post thumbnail url
 export function getPostThumb(dir, filename, size = 'small') {
-  if (filename === null || filename === undefined) {
+  if (!filenameIsValid(filename)) {
     return '/static/images/default-cover.png';
   }
 
@@ -52,12 +52,15 @@ export function getPostThumb(dir, filename, size = 'small') {
 }
 
 export function canUseWebP() {
-  const elem =
-    typeof document === 'object' ? document.createElement('canvas') : {};
-
-  if (!!(elem.getContext && elem.getContext('2d'))) {
-    return elem.toDataURL('image/webp').indexOf('data:image/webp') === 0;
-  } else {
+  try {
+    const elem =
+      typeof document === 'object' ? document.createElement('canvas') : {};
+    if (!!(elem.getContext && elem.getContext('2d'))) {
+      return elem.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+    } else {
+      return false;
+    }
+  } catch (err) {
     return false;
   }
 }
@@ -69,4 +72,8 @@ export const languages = Object.keys(params.global.languages).map(
 export function languageIdToName(langId) {
   const language = languages.find(lang => lang.id === langId);
   return language !== undefined ? language.name : null;
+}
+
+function filenameIsValid(filename) {
+  return filename !== null && filename !== undefined && filename !== '';
 }
